@@ -1,0 +1,18 @@
+{
+  "name": "Harvest",
+  "short_name": "Harvest",
+  "description": "Track gospel conversations and follow up faithfully",
+
+  "_deploy_note": "SUBDIRECTORY DEPLOYMENT (e.g. username.github.io/harvest/): change start_url to '/harvest/' and all icon src paths to '/harvest/icons/...'",
+
+  "start_url": "/harvest/",
+  "display": "standalone",
+  "background_color": "#f5ede0",
+  "theme_color": "#f5ede0",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/harvest/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/harvest/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/harvest/icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

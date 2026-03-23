@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Track gospel conversations and follow up faithfully">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Harvest">
+<meta name="theme-color" content="#f5ede0">
+<title>Harvest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active" role="main">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <h1>Harvest</h1>
+        <div class="subtitle" id="home-subtitle">Loading&hellip;</div>
+      </div>
+      <button class="icon-btn" onclick="showSettings()" aria-label="Settings">&#9881;&#65039;</button>
+    </div>
+  </div>
+  <div id="home-list" class="card-list"></div>
+</div>
+
+<!-- PRAYER -->
+<div id="screen-prayer" class="screen" role="main">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <h1>Prayer</h1>
+        <div class="subtitle" id="prayer-subtitle">Your daily intercession</div>
+      </div>
+    </div>
+  </div>
+  <div class="prayer-verse" aria-label="Scripture">
+    &#8220;The harvest is plentiful, but the workers are few. Ask the Lord of the harvest, therefore, to send out workers into his harvest field.&#8221;
+    <cite>&#8212; Matthew 9:37&#8211;38</cite>
+  </div>
+  <p class="prayer-hint">&#10003; resets each morning &nbsp;&#183;&nbsp; hold &#8942;&#8942; to reorder &nbsp;&#183;&nbsp; &#215; removes from this list</p>
+  <div id="prayer-list" class="prayer-list-wrap" role="list"></div>
+</div>
+
+<!-- ADD PERSON -->
+<div id="screen-add" class="screen form-screen" role="main">
+  <div class="form-header">
+    <button class="back-btn" onclick="showHome()" aria-label="Back to People">&#8592;</button>
+    <h2 class="form-title">Add Person</h2>
+  </div>
+  <div class="form-body">
+    <div class="field">
+      <label for="add-name">Name *</label>
+      <input type="text" id="add-name" placeholder="First name or full name" autocomplete="off" autocapitalize="words">
+      <div class="field-error" id="add-name-error" role="alert" aria-live="polite"></div>
+    </div>
+    <div class="field">
+      <label for="add-context">How do you know them?</label>
+      <input type="text" id="add-context" placeholder="Neighbor, coworker, friend&#8230;" autocomplete="off" autocapitalize="sentences">
+    </div>
+    <div class="field">
+      <label id="add-stage-label">Where are they spiritually?</label>
+      <div class="stage-picker" id="add-stage-picker" role="radiogroup" aria-labelledby="add-stage-label"></div>
+    </div>
+    <div class="field">
+      <label for="add-note">First note (optional)</label>
+      <textarea id="add-note" placeholder="What happened? What did you sense?"></textarea>
+    </div>
+    <div class="field">
+      <label>Follow-up by</label>
+      <button type="button" class="date-picker-trigger" id="add-followup-trigger"
+              onclick="openAddFollowupPicker()" aria-label="Select follow-up date">
+        <span id="add-followup-display">Tap to set a follow-up date</span>
+        <span class="date-field-icon" aria-hidden="true">&#128197;</span>
+      </button>
+    </div>
+    <button class="submit-btn" onclick="submitAddPerson()">Add to Harvest</button>
+  </div>
+</div>
+
+<!-- PERSON DETAIL -->
+<div id="screen-detail" class="screen" role="main">
+  <div class="detail-topbar topbar">
+    <div class="topbar-row">
+      <button class="back-btn" onclick="showHome()" aria-label="Back to People">&#8592;</button>
+      <button class="icon-btn" onclick="openDeleteConfirm()" aria-label="Delete person">&#128465;&#65039;</button>
+    </div>
+  </div>
+  <div class="detail-hero">
+    <div id="detail-initial" class="detail-initial-big" aria-hidden="true"></div>
+    <div id="detail-name" class="detail-name"></div>
+    <div id="detail-context" class="detail-context"></div>
+    <span id="detail-stage-badge" class="stage-badge"></span>
+  </div>
+  <div class="detail-action-row">
+    <button class="action-btn primary" onclick="openLogModal()">&#65291; Log Conversation</button>
+    <button class="action-btn secondary" onclick="openSetFollowup()">Set Follow-up</button>
+  </div>
+  <div id="detail-prayer-toggle" style="padding:10px 16px 0;"></div>
+  <div class="timeline" id="detail-timeline"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="screen-settings" class="screen" role="main">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <h1>Settings</h1>
+      </div>
+      <button class="back-btn" onclick="showHome()" aria-label="Back to People">&#8592;</button>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Stage Labels</div>
+    <div class="settings-card" id="stage-settings-list"></div>
+  </div>
+  <div class="settings-section" style="padding-bottom:0">
+    <div class="settings-section-title">Data</div>
+  </div>
+  <div class="storage-notice" role="note">
+    Your data is stored only on this device. It is never uploaded anywhere. Export regularly so you don&rsquo;t lose it if you clear your browser or get a new phone.
+  </div>
+  <button class="export-btn" onclick="exportCSV()">&#11015; Export to CSV</button>
+  <button class="danger-btn" onclick="openClearDataConfirm()">Clear All Data</button>
+</div>
+
+<!-- LOG MODAL -->
+<div id="log-modal" class="modal-overlay" onclick="closeLogModal(event)"
+     role="dialog" aria-modal="true" aria-labelledby="log-modal-title">
+  <div class="modal-sheet">
+    <div class="modal-handle" aria-hidden="true"></div>
+    <div class="modal-title" id="log-modal-title">Log Conversation</div>
+    <div class="modal-body">
+      <div class="field">
+        <label id="log-stage-label">Update spiritual stage</label>
+        <div class="stage-picker" id="log-stage-picker" role="radiogroup" aria-labelledby="log-stage-label"></div>
+      </div>
+      <div class="field">
+        <label for="log-note">Note</label>
+        <textarea id="log-note" placeholder="What happened? What did you share? How did they respond?"></textarea>
+      </div>
+      <div class="field">
+        <label>Follow-up by</label>
+        <button type="button" class="date-picker-trigger" id="log-followup-trigger"
+                onclick="openLogFollowupPicker()" aria-label="Select follow-up date">
+          <span id="log-followup-display">Tap to set a follow-up date</span>
+          <span class="date-field-icon" aria-hidden="true">&#128197;</span>
+        </button>
+      </div>
+      <button class="submit-btn" onclick="saveLog()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- DATE PICKER SHEET -->
+<div id="datepicker-overlay" class="modal-overlay"
+     onclick="if(event.target===this)closeDatePicker()"
+     role="dialog" aria-modal="true" aria-labelledby="datepicker-title">
+  <div class="modal-sheet">
+    <div class="modal-handle" aria-hidden="true"></div>
+    <div class="modal-title" id="datepicker-title">Select Date</div>
+    <div class="modal-body">
+      <div class="datepicker-nav">
+        <button type="button" class="datepicker-nav-btn" onclick="dpPrevMonth()" aria-label="Previous month">&#8249;</button>
+        <div class="datepicker-month-year" id="datepicker-month-year" aria-live="polite"></div>
+        <button type="button" class="datepicker-nav-btn" onclick="dpNextMonth()" aria-label="Next month">&#8250;</button>
+      </div>
+      <div class="datepicker-weekdays" aria-hidden="true">
+        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+      </div>
+      <div class="datepicker-grid" id="datepicker-grid" role="grid" aria-label="Calendar"></div>
+      <div class="datepicker-footer">
+        <button type="button" class="datepicker-clear" onclick="dpClearDate()">Clear Date</button>
+        <button type="button" class="submit-btn datepicker-done" onclick="dpDone()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM SHEET -->
+<div id="confirm-overlay" class="modal-overlay"
+     role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="modal-sheet">
+    <div class="modal-handle" aria-hidden="true"></div>
+    <div class="confirm-title" id="confirm-title"></div>
+    <div class="confirm-body" id="confirm-body"></div>
+    <div class="confirm-actions">
+      <button type="button" class="confirm-cancel" id="confirm-cancel" onclick="closeConfirmSheet()">Cancel</button>
+      <button type="button" class="confirm-confirm danger" id="confirm-confirm" onclick="doConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV + FAB -->
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button class="nav-btn active" id="nav-home" onclick="showHome()">
+    <span class="nav-icon" aria-hidden="true">&#127806;</span>
+    <span class="nav-label">People</span>
+  </button>
+  <button class="nav-btn" id="nav-prayer" onclick="showPrayer()">
+    <span class="nav-icon" aria-hidden="true">&#128591;</span>
+    <span class="nav-label">Prayer</span>
+  </button>
+</nav>
+<button class="fab" id="main-fab" onclick="showAdd()" aria-label="Add person">+</button>
+
+<script src="js/data.js"></script>
+<script src="js/drag.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
