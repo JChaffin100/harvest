@@ -700,6 +700,140 @@ function exportCSV() {
   a.click();
 }
 
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    
+    // Very simple CSV parser handling basic quotes and commas
+    const rows = [];
+    let currentRow = [];
+    let currentCell = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      
+      if (inQuotes) {
+        if (char === '"' && nextChar === '"') {
+          currentCell += '"';
+          i++; // skip next quote
+        } else if (char === '"') {
+          inQuotes = false;
+        } else {
+          currentCell += char;
+        }
+      } else {
+        if (char === '"') {
+          inQuotes = true;
+        } else if (char === ',') {
+          currentRow.push(currentCell);
+          currentCell = '';
+        } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+          currentRow.push(currentCell);
+          rows.push(currentRow);
+          currentRow = [];
+          currentCell = '';
+          if (char === '\r') i++;
+        } else if (char !== '\r') {
+          currentCell += char;
+        }
+      }
+    }
+    if (currentCell || currentRow.length > 0) {
+      currentRow.push(currentCell);
+      rows.push(currentRow);
+    }
+    
+    // Process rows
+    if (rows.length === 0) {
+      event.target.value = '';
+      return;
+    }
+    
+    // Check header
+    const header = rows[0];
+    if (header[0] !== 'Name') {
+      alert('Invalid CSV format. Please make sure you are importing a Harvest export file.');
+      event.target.value = '';
+      return;
+    }
+    
+    const newPeople = [];
+    const stages = getStages();
+    
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || row.length === 0 || (!row[0] && row.length === 1)) continue; // skip empty rows
+      
+      const name = row[0] || '';
+      if (!name.trim()) continue; // Name is required
+      const context = row[1] || '';
+      const stageName = row[2] || '';
+      const followup = row[3] || '';
+      const lastNote = row[4] || '';
+      
+      // Match stage by name, fallback to 1
+      let stageId = 1;
+      const matchedStage = stages.find(s => s.name.toLowerCase() === stageName.toLowerCase());
+      if (matchedStage) stageId = matchedStage.id;
+      
+      // Validate date
+      let validFollowup = null;
+      if (followup && /^\d{4}-\d{2}-\d{2}$/.test(followup)) {
+         validFollowup = followup;
+      }
+      
+      const logs = [];
+      if (lastNote.trim()) {
+        logs.push({ date: todayStr(), note: lastNote.trim(), stageChange: null });
+      }
+      
+      newPeople.push({
+        id: generateId(),
+        name: name,
+        context: context,
+        stage: stageId,
+        followup: validFollowup,
+        logs: logs
+      });
+    }
+    
+    if (newPeople.length === 0) {
+      alert('No valid people found in the CSV.');
+      event.target.value = '';
+      return;
+    }
+    
+    openConfirmSheet(
+      'Import ' + newPeople.length + ' People?',
+      'This will append ' + newPeople.length + ' people to your harvest list. Anyone already on your list will be duplicated. Use this primarily for restoring data from another device.',
+      'Cancel',
+      'Import',
+      'primary',
+      () => {
+        const people = getPeople();
+        const updatedPeople = people.concat(newPeople);
+        savePeople(updatedPeople);
+        
+        const list = getPrayerList() || [];
+        newPeople.forEach(p => list.push(p.id));
+        savePrayerList(list);
+        
+        alert('Successfully imported ' + newPeople.length + ' people.');
+        showHome();
+      }
+    );
+    
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
 function openClearDataConfirm() {
   openConfirmSheet(
     'Delete Everything?',

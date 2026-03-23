@@ -129,6 +129,8 @@
     Your data is stored only on this device. It is never uploaded anywhere. Export regularly so you don&rsquo;t lose it if you clear your browser or get a new phone.
   </div>
   <button class="export-btn" onclick="exportCSV()">&#11015; Export to CSV</button>
+  <input type="file" id="csv-upload-input" accept=".csv" style="display:none;" onchange="importCSV(event)">
+  <button class="export-btn" onclick="document.getElementById('csv-upload-input').click()">&#11014; Import from CSV</button>
   <button class="danger-btn" onclick="openClearDataConfirm()">Clear All Data</button>
 </div>
 
