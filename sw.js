@@ -7,7 +7,7 @@
 // For root deployment (custom domain or username.github.io/) no changes needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE = 'harvest-v2';
+const CACHE = 'harvest-v3';
 const FONT_CACHE = 'harvest-fonts-v1';
 
 const PRECACHE_URLS = [
